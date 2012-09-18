@@ -1,3 +1,4 @@
+#!/usr/bin/python
 from blkmaker import _dblsha256
 import blktemplate
 import json
