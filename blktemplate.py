@@ -1,6 +1,13 @@
-from binascii import a2b_hex as _a2b_hex
+from binascii import a2b_hex as __a2b_hex
 import blkmaker as _blkmaker
 from time import time as _time
+
+try:
+	__a2b_hex('aa')
+	_a2b_hex = __a2b_hex
+except TypeError:
+	def _a2b_hex(a):
+		return __a2b_hex(a.encode('ascii'))
 
 def request(jcaps, lpid = None):
 	params = {
