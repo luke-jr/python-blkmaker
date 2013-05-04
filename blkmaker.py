@@ -81,7 +81,7 @@ def submit(tmpl, data, dataid, nonce):
 	data = data[:76]
 	data += _pack('!I', nonce)
 	
-	if 'submit/truncate' not in tmpl.mutations and dataid:
+	if 'submit/truncate' not in tmpl.mutations or dataid:
 		data += _varintEncode(1 + len(tmpl.txns))
 		
 		data += _extranonce(tmpl, dataid)
