@@ -88,7 +88,7 @@ def submit(tmpl, data, dataid, nonce):
 		
 		if 'submit/coinbase' not in tmpl.mutations:
 			for i in range(len(tmpl.txns)):
-				data += tmpl.txns[i]
+				data += tmpl.txns[i].data
 	
 	return {
 		'id': 0,
