@@ -57,9 +57,9 @@ class Template:
 		return self.submitold
 	
 	# Wrappers around blkmaker, for OO friendliness
-	def get_data(self, usetime = _time()):
+	def get_data(self, usetime = None):
 		return _blkmaker.get_data(self, usetime)
-	def time_left(self, nowtime = _time()):
+	def time_left(self, nowtime = None):
 		return _blkmaker.time_left(self, nowtime)
 	def work_left(self):
 		return _blkmaker.work_left(self)
@@ -70,7 +70,8 @@ class Template:
 	def request(self, lpid = None):
 		return request(self.addcaps(), lpid)
 	
-	def add(self, json, time_rcvd = _time()):
+	def add(self, json, time_rcvd = None):
+		if time_rcvd is None: time_rcvd = _time()
 		if self.version:
 			return False;
 		

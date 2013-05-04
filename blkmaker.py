@@ -30,7 +30,8 @@ def _extranonce(tmpl, workid):
 	coinbase = coinbase[0:41] + chr(newLen).encode('ascii') + coinbase[42:42 + origLen] + extradata + coinbase[42 + origLen:]
 	return coinbase
 
-def get_data(tmpl, usetime = _time()):
+def get_data(tmpl, usetime = None):
+	if usetime is None: usetime = _time()
 	if (not (time_left(tmpl, usetime) and work_left(tmpl))):
 		return
 	
@@ -56,7 +57,8 @@ def get_data(tmpl, usetime = _time()):
 	
 	return (cbuf, dataid)
 
-def time_left(tmpl, nowtime = _time()):
+def time_left(tmpl, nowtime = None):
+	if nowtime is None: nowtime = _time()
 	age = (nowtime - tmpl._time_rcvd)
 	if age >= tmpl.expires:
 		return 0
