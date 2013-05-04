@@ -9,7 +9,7 @@ def _dblsha256(data):
 	return _sha256(_sha256(data).digest()).digest()
 
 def _build_merkle_root(tmpl, coinbase):
-	txnlist = [coinbase] + list(tmpl.txns)
+	txnlist = [coinbase] + [t.data for t in tmpl.txns]
 	merklehashes = [_dblsha256(t) for t in txnlist]
 	while len(merklehashes) > 1:
 		if len(merklehashes) % 2:
