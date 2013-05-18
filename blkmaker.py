@@ -33,7 +33,7 @@ def _extranonce(tmpl, workid):
 def get_data(tmpl, usetime = None):
 	if usetime is None: usetime = _time()
 	if (not (time_left(tmpl, usetime) and work_left(tmpl))):
-		return
+		return (None, None)
 	
 	cbuf = _pack('<I', tmpl.version)
 	cbuf += tmpl.prevblk
@@ -42,10 +42,10 @@ def get_data(tmpl, usetime = None):
 	tmpl.next_dataid += 1
 	cbtxndata = _extranonce(tmpl, dataid)
 	if (not cbtxndata):
-		return 0
+		return (None, None)
 	merkleroot = _build_merkle_root(tmpl, cbtxndata)
 	if (not merkleroot):
-		return 0
+		return (None, None)
 	cbuf += merkleroot
 	
 	timehdr = tmpl.curtime + int(usetime - tmpl._time_rcvd)
