@@ -66,6 +66,8 @@ class Template:
 		return self.submitold
 	
 	# Wrappers around blkmaker, for OO friendliness
+	def init_generation2(self, script):
+		return _blkmaker.init_generation2(self, script)
 	def init_generation(self, script):
 		return _blkmaker.init_generation(self, script)
 	def append_coinbase_safe(self, append):
