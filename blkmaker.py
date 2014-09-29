@@ -246,7 +246,7 @@ def _varintEncode(n):
 	# blocks
 	return b'\xfd' + _pack('<H', n)
 
-def submit(tmpl, data, dataid, nonce, foreign=False):
+def _assemble_submission(tmpl, data, dataid, nonce, foreign):
 	data = data[:76]
 	data += _pack('!I', nonce)
 	
@@ -259,6 +259,11 @@ def submit(tmpl, data, dataid, nonce, foreign=False):
 			for i in range(len(tmpl.txns)):
 				data += tmpl.txns[i].data
 	
+	return _b2a_hex(data).decode('ascii')
+
+def submit(tmpl, data, dataid, nonce, foreign=False):
+	blkhex = _assemble_submission(tmpl, data, dataid, nonce, foreign)
+	
 	info = {}
 	if (not getattr(tmpl, 'workid', None) is None) and not foreign:
 		info['workid'] = tmpl.workid
@@ -267,7 +272,7 @@ def submit(tmpl, data, dataid, nonce, foreign=False):
 		'id': 0,
 		'method': 'submitblock',
 		'params': [
-			_b2a_hex(data).decode('ascii'),
+			blkhex,
 			info
 		]
 	}
