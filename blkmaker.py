@@ -3,6 +3,8 @@
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the standard MIT license.  See COPYING for more details.
 
+sizeof_workid = 8
+
 import base58 as _base58
 from binascii import b2a_hex as _b2a_hex
 from hashlib import sha256 as _sha256
@@ -75,8 +77,8 @@ def _build_merkle_branches(tmpl):
 	if not _hash_transactions(tmpl):
 		return False
 	
-	branchcount = len(tmpl.txns).bit_length();
-	branches = [];
+	branchcount = len(tmpl.txns).bit_length()
+	branches = []
 	
 	merklehashes = [None] + [txn.hash_ for txn in tmpl.txns]
 	while len(branches) < branchcount:
@@ -101,9 +103,8 @@ def _build_merkle_root(tmpl, coinbase):
 	return lhs
 
 _cbScriptSigLen = 4 + 1 + 36
-sizeof_workid = 8
 
-def _append_cb(tmpl, append):
+def _append_cb(tmpl, append, appended_at_offset = None):
 	coinbase = tmpl.cbtxn.data
 	# The following can be done better in both Python 2 and Python 3, but this way works with both
 	origLen = ord(coinbase[_cbScriptSigLen:_cbScriptSigLen+1])
@@ -113,6 +114,8 @@ def _append_cb(tmpl, append):
 		return None
 	
 	cbExtraNonce = _cbScriptSigLen + 1 + origLen
+	if not appended_at_offset is None:
+		appended_at_offset[0] = cbExtraNonce
 	
 	newLen = origLen + appendsz
 	coinbase = coinbase[:_cbScriptSigLen] + chr(newLen).encode('ascii') + coinbase[_cbScriptSigLen+1:cbExtraNonce] + append + coinbase[cbExtraNonce:]
@@ -142,7 +145,7 @@ def _extranonce(tmpl, workid):
 	coinbase = _append_cb(tmpl, extradata)
 	return coinbase
 
-def _set_times(tmpl, usetime = None, out_expire = None):
+def _set_times(tmpl, usetime = None, out_expire = None, can_roll_ntime = False):
 	time_passed = int(usetime - tmpl._time_rcvd)
 	timehdr = tmpl.curtime + time_passed
 	if (timehdr > tmpl.maxtime):
@@ -150,6 +153,12 @@ def _set_times(tmpl, usetime = None, out_expire = None):
 	return _pack('<I', timehdr)
 	if not out_expire is None:
 		out_expire[0] = tmpl.expires - time_passed - 1
+		
+		if can_roll_ntime:
+			# If the caller can roll the time header, we need to expire before reaching the maxtime
+			maxtime_expire_limit = (tmpl.maxtime - timehdr) + 1
+			if out_expire[0] > maxtime_expire_limit:
+				out_expire[0] = maxtime_expire_limit
 
 def get_data(tmpl, usetime = None, out_expire = None):
 	if usetime is None: usetime = _time()
@@ -173,6 +182,34 @@ def get_data(tmpl, usetime = None, out_expire = None):
 	cbuf += tmpl.diffbits
 	
 	return (cbuf, dataid)
+
+def get_mdata(tmpl, usetime = None, out_expire = None, extranoncesz = sizeof_workid):
+	if usetime is None: usetime = _time()
+	if not (True
+		and time_left(tmpl, usetime)
+		and (not tmpl.cbtxn is None)
+		and _build_merkle_branches(tmpl)
+	):
+		return None
+	
+	if extranoncesz == sizeof_workid:
+		# Avoid overlapping with blkmk_get_data use
+		extranoncesz += 1
+	
+	cbuf = _pack('<I', tmpl.version)
+	cbuf += tmpl.prevblk
+	
+	dummy = b'\0' * extranoncesz
+	cbextranonceoffset = [None]
+	cbtxn = _append_cb(tmpl, dummy, cbextranonceoffset)
+	if cbtxn is None:
+		return None
+	cbuf += b'\0' * 0x20
+	
+	cbuf += _set_times(tmpl, usetime, out_expire, True)
+	cbuf += tmpl.diffbits
+	
+	return (cbuf, cbtxn, cbextranonceoffset[0], tmpl._mrklbranch)
 
 def time_left(tmpl, nowtime = None):
 	if nowtime is None: nowtime = _time()

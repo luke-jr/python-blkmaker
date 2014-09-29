@@ -76,6 +76,8 @@ class Template:
 		return _blkmaker.append_coinbase_safe(self, append)
 	def get_data(self, usetime = None):
 		return _blkmaker.get_data(self, usetime)
+	def get_mdata(self, usetime = None, out_expire = None, extranoncesz = _blkmaker.sizeof_workid):
+		return _blkmaker.get_mdata(self, usetime, out_expire, extranoncesz)
 	def time_left(self, nowtime = None):
 		return _blkmaker.time_left(self, nowtime)
 	def work_left(self):
