@@ -20,15 +20,21 @@ def init_generation(tmpl, script):
 	if not tmpl.cbtxn is None:
 		raise 0
 	
-	# Skip "no extranonce" scriptSig, since it would be too short (min 2 bytes)
-	tmpl.next_dataid += 1
+	sh = b''
+	h = tmpl.height
+	while h > 127:
+		sh += _pack('<B', h & 0xff)
+		h >>= 8
+	sh += _pack('<B', h)
+	sh = _pack('<B', len(sh)) + sh
 	
 	data = b''
 	data += b"\x01\0\0\0"  # txn ver
 	data += b"\x01"        # input count
 	data +=   b"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"  # prevout
 	data +=   b"\xff\xff\xff\xff"   # index (-1)
-	data +=   b"\0"                 # scriptSig length (0; extranonce will bring up to 4)
+	data +=   _pack('<B', len(sh))  # scriptSig length
+	data +=   sh
 	data +=   b"\xff\xff\xff\xff"   # sequence
 	data += b"\x01"        # output count
 	data +=   _pack('<Q', tmpl.cbvalue)
