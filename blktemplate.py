@@ -57,6 +57,8 @@ class Template:
 		return self.submitold
 	
 	# Wrappers around blkmaker, for OO friendliness
+	def append_coinbase_safe(self, append):
+		return _blkmaker.append_coinbase_safe(self, append)
 	def get_data(self, usetime = None):
 		return _blkmaker.get_data(self, usetime)
 	def time_left(self, nowtime = None):

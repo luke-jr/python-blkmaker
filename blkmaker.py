@@ -18,16 +18,45 @@ def _build_merkle_root(tmpl, coinbase):
 	return merklehashes[0]
 
 _cbScriptSigLen = 4 + 1 + 36
+sizeof_workid = 8
+
+def _append_cb(tmpl, append):
+	coinbase = tmpl.cbtxn.data
+	# The following can be done better in both Python 2 and Python 3, but this way works with both
+	origLen = ord(coinbase[_cbScriptSigLen:_cbScriptSigLen+1])
+	appendsz = len(append)
+	
+	if origLen > 100 - appendsz:
+		return None
+	
+	cbExtraNonce = _cbScriptSigLen + 1 + origLen
+	
+	newLen = origLen + appendsz
+	coinbase = coinbase[:_cbScriptSigLen] + chr(newLen).encode('ascii') + coinbase[_cbScriptSigLen+1:cbExtraNonce] + append + coinbase[cbExtraNonce:]
+	
+	return coinbase
+
+def append_coinbase_safe(tmpl, append):
+	if 'coinbase/append' not in tmpl.mutations and 'coinbase' not in tmpl.mutations:
+		raise RuntimeError('Coinbase appending not allowed by template')
+	
+	datasz = len(tmpl.cbtxn.data)
+	availsz = 100 - sizeof_workid - ord(tmpl.cbtxn.data[_cbScriptSigLen:_cbScriptSigLen+1])
+	if len(append) > availsz:
+		return availsz
+	
+	newcb = _append_cb(tmpl, append)
+	if newcb is None:
+		raise RuntimeError('Append failed')
+	
+	return availsz
 
 def _extranonce(tmpl, workid):
 	coinbase = tmpl.cbtxn.data
 	if not workid:
 		return coinbase
 	extradata = _pack('<Q', workid)
-	# The following can be done better in both Python 2 and Python 3, but this way works with both
-	origLen = ord(coinbase[41:42])
-	newLen = origLen + len(extradata)
-	coinbase = coinbase[0:41] + chr(newLen).encode('ascii') + coinbase[42:42 + origLen] + extradata + coinbase[42 + origLen:]
+	coinbase = _append_cb(tmpl, extradata)
 	return coinbase
 
 def get_data(tmpl, usetime = None):
