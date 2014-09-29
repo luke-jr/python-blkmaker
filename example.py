@@ -1,10 +1,16 @@
 #!/usr/bin/python
+# Copyright 2012 Luke Dashjr
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the standard MIT license.  See COPYING for more details.
+
 from blkmaker import _dblsha256
 import blktemplate
 import json
 import struct
 import sys
 
+# This test_input data is released under the terms of the Creative Commons "CC0 1.0 Universal" license and/or copyright waiver.
 test_input = '''
 {
 	"result": {

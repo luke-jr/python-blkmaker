@@ -1,3 +1,8 @@
+# Copyright 2012-2014 Luke Dashjr
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the standard MIT license.  See COPYING for more details.
+
 from binascii import a2b_hex as __a2b_hex
 import blkmaker as _blkmaker
 from time import time as _time

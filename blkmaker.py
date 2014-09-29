@@ -1,3 +1,8 @@
+# Copyright 2012-2014 Luke Dashjr
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the standard MIT license.  See COPYING for more details.
+
 from binascii import b2a_hex as _b2a_hex
 from hashlib import sha256 as _sha256
 from struct import pack as _pack
