@@ -20,6 +20,9 @@ def init_generation2(tmpl, script):
 	if not tmpl.cbtxn is None:
 		return (0, False)
 	
+	if len(script) >= 0xfd:
+		return (0, True)
+	
 	sh = b''
 	h = tmpl.height
 	while h > 127:
