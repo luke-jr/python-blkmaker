@@ -55,7 +55,7 @@ class Template:
 		# For now, it's a simple "filled" vs "not filled"
 		if self.version:
 			return 0
-		return ('coinbasetxn', 'workid', 'time/increment', 'coinbase/append')
+		return ('coinbasetxn', 'workid', 'time/increment', 'coinbase/append', 'version/force', 'version/reduce', 'submit/coinbase', 'submit/truncate')
 	
 	def get_longpoll(self):
 		return self.lp
