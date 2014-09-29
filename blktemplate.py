@@ -46,6 +46,7 @@ class Template:
 		self.sizelimit = 0xffffffff
 		self.maxtime = 0xffffffff
 		self.maxtimeoff = 0x7fff
+		self.mintime = 0
 		self.mintimeoff = -0x7fff
 		self.maxnonce = 0xffffffff
 		self.expires = 0x7fff
@@ -118,6 +119,10 @@ class Template:
 		self.workid = json.get('workid', None)
 		
 		self.expires = json.get('expires', self.expires)
+		self.maxtime = json.get('maxtime', self.maxtime)
+		self.maxtimeoff = json.get('maxtimeoff', self.maxtimeoff)
+		self.mintime = json.get('mintime', self.mintime)
+		self.mintimeoff = json.get('mintimeoff', self.mintimeoff)
 		
 		self.lp = _LPInfo()
 		if 'longpollid' in json:
