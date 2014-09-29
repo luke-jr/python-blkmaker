@@ -64,7 +64,7 @@ def _extranonce(tmpl, workid):
 	coinbase = _append_cb(tmpl, extradata)
 	return coinbase
 
-def get_data(tmpl, usetime = None):
+def get_data(tmpl, usetime = None, out_expire = None):
 	if usetime is None: usetime = _time()
 	if (not (time_left(tmpl, usetime) and work_left(tmpl))):
 		return (None, None)
@@ -82,12 +82,15 @@ def get_data(tmpl, usetime = None):
 		return (None, None)
 	cbuf += merkleroot
 	
-	timehdr = tmpl.curtime + int(usetime - tmpl._time_rcvd)
+	time_passed = int(usetime - tmpl._time_rcvd)
+	timehdr = tmpl.curtime + time_passed
 	if (timehdr > tmpl.maxtime):
 		timehdr = tmpl.maxtime
 	
 	cbuf += _pack('<I', timehdr)
 	cbuf += tmpl.diffbits
+	if not out_expire is None:
+		out_expire[0] = tmpl.expires - time_passed - 1
 	
 	return (cbuf, dataid)
 
