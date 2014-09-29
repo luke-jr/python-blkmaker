@@ -163,21 +163,21 @@ def _varintEncode(n):
 	# blocks
 	return b'\xfd' + _pack('<H', n)
 
-def submit(tmpl, data, dataid, nonce):
+def submit(tmpl, data, dataid, nonce, foreign=False):
 	data = data[:76]
 	data += _pack('!I', nonce)
 	
-	if 'submit/truncate' not in tmpl.mutations or dataid:
+	if foreign or ('submit/truncate' not in tmpl.mutations or dataid):
 		data += _varintEncode(1 + len(tmpl.txns))
 		
 		data += _extranonce(tmpl, dataid)
 		
-		if 'submit/coinbase' not in tmpl.mutations:
+		if foreign or ('submit/coinbase' not in tmpl.mutations):
 			for i in range(len(tmpl.txns)):
 				data += tmpl.txns[i].data
 	
 	info = {}
-	if not getattr(tmpl, 'workid', None) is None:
+	if (not getattr(tmpl, 'workid', None) is None) and not foreign:
 		info['workid'] = tmpl.workid
 	
 	return {
@@ -188,6 +188,9 @@ def submit(tmpl, data, dataid, nonce):
 			info
 		]
 	}
+
+def submit_foreign(tmpl, data, dataid, nonce):
+	return submit(tmpl, data, dataid, nonce, True)
 
 def address_to_script(addr):
 	addrbin = _base58.b58decode(addr, 25)

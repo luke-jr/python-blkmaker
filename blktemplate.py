@@ -78,8 +78,10 @@ class Template:
 		return _blkmaker.time_left(self, nowtime)
 	def work_left(self):
 		return _blkmaker.work_left(self)
-	def submit(self, data, dataid, nonce):
-		return _blkmaker.submit(self, data, dataid, nonce)
+	def submit(self, data, dataid, nonce, foreign=False):
+		return _blkmaker.submit(self, data, dataid, nonce, foreign)
+	def submit_foreign(self, data, dataid, nonce):
+		return _blkmaker.submit_foreign(self, data, dataid, nonce)
 	
 	# JSON-specific stuff
 	def request(self, lpid = None):
