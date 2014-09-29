@@ -85,6 +85,8 @@ class Template:
 		return _blkmaker.time_left(self, nowtime)
 	def work_left(self):
 		return _blkmaker.work_left(self)
+	def propose(self, caps, foreign):
+		return _blkmaker.propose(self, caps, foreign)
 	def submit(self, data, dataid, nonce, foreign=False):
 		return _blkmaker.submit(self, data, dataid, nonce, foreign)
 	def submit_foreign(self, data, dataid, nonce):

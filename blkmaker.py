@@ -11,7 +11,7 @@ from hashlib import sha256 as _sha256
 from struct import pack as _pack
 from time import time as _time
 
-from blktemplate import _Transaction
+from blktemplate import _Transaction, request as _request
 
 MAX_BLOCK_VERSION = 2
 
@@ -173,26 +173,36 @@ def _set_times(tmpl, usetime = None, out_expire = None, can_roll_ntime = False):
 			if out_expire[0] > maxtime_expire_limit:
 				out_expire[0] = maxtime_expire_limit
 
+def _sample_data(tmpl, dataid):
+	cbuf = _pack('<I', tmpl.version)
+	cbuf += tmpl.prevblk
+	
+	cbtxndata = _extranonce(tmpl, dataid)
+	if not cbtxndata:
+		return None
+	
+	merkleroot = _build_merkle_root(tmpl, cbtxndata)
+	if not merkleroot:
+		return None
+	cbuf += merkleroot
+	
+	cbuf += _pack('<I', tmpl.curtime)
+	cbuf += tmpl.diffbits
+	
+	return cbuf
+
 def get_data(tmpl, usetime = None, out_expire = None):
 	if usetime is None: usetime = _time()
 	if (not (time_left(tmpl, usetime) and work_left(tmpl))):
 		return (None, None)
 	
-	cbuf = _pack('<I', tmpl.version)
-	cbuf += tmpl.prevblk
-	
 	dataid = tmpl.next_dataid
 	tmpl.next_dataid += 1
-	cbtxndata = _extranonce(tmpl, dataid)
-	if (not cbtxndata):
+	cbuf = _sample_data(tmpl, dataid)
+	if cbuf is None:
 		return (None, None)
-	merkleroot = _build_merkle_root(tmpl, cbtxndata)
-	if (not merkleroot):
-		return (None, None)
-	cbuf += merkleroot
 	
-	cbuf += _set_times(tmpl, usetime, out_expire)
-	cbuf += tmpl.diffbits
+	cbuf = cbuf[:68] + _set_times(tmpl, usetime, out_expire) + cbuf[68+4:]
 	
 	return (cbuf, dataid)
 
@@ -260,6 +270,23 @@ def _assemble_submission(tmpl, data, dataid, nonce, foreign):
 				data += tmpl.txns[i].data
 	
 	return _b2a_hex(data).decode('ascii')
+
+def propose(tmpl, caps, foreign):
+	jreq = _request(caps)
+	jparams = jreq['params'][0]
+	jparams['mode'] = 'proposal'
+	if (not getattr(tmpl, 'workid', None) is None) and not foreign:
+		jparams['workid'] = tmpl.workid
+	
+	dataid = 0
+	if 'coinbase/append' in tmpl.mutations or 'coinbase' in tmpl.mutations:
+		dataid = 1
+	
+	sdata = _sample_data(tmpl, dataid)
+	blkhex = _assemble_submission(tmpl, sdata, dataid, 0, foreign)
+	jparams['data'] = blkhex
+	
+	return jreq
 
 def submit(tmpl, data, dataid, nonce, foreign=False):
 	blkhex = _assemble_submission(tmpl, data, dataid, nonce, foreign)
