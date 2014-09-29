@@ -16,8 +16,8 @@ MAX_BLOCK_VERSION = 2
 def _dblsha256(data):
 	return _sha256(_sha256(data).digest()).digest()
 
-def init_generation2(tmpl, script):
-	if not tmpl.cbtxn is None:
+def init_generation3(tmpl, script, override_cb=False):
+	if (not tmpl.cbtxn is None) and not (override_cb and ('generate' in tmpl.mutations)):
 		return (0, False)
 	
 	if len(script) >= 0xfd:
@@ -56,9 +56,10 @@ def init_generation2(tmpl, script):
 	tmpl.mutations.add('generate')
 	
 	return (tmpl.cbvalue, True)
+init_generation2 = init_generation3
 
-def init_generation(tmpl, script):
-	return init_generation2(tmpl, script)[0]
+def init_generation(tmpl, script, override_cb=False):
+	return init_generation2(tmpl, script, override_cb)[0]
 
 def _build_merkle_root(tmpl, coinbase):
 	txnlist = [coinbase] + [t.data for t in tmpl.txns]

@@ -66,10 +66,12 @@ class Template:
 		return self.submitold
 	
 	# Wrappers around blkmaker, for OO friendliness
-	def init_generation2(self, script):
-		return _blkmaker.init_generation2(self, script)
-	def init_generation(self, script):
-		return _blkmaker.init_generation(self, script)
+	def init_generation3(self, script, override_cb=False):
+		return _blkmaker.init_generation3(self, script, override_cb)
+	def init_generation2(self, script, override_cb=False):
+		return _blkmaker.init_generation2(self, script, override_cb)
+	def init_generation(self, script, override_cb=False):
+		return _blkmaker.init_generation(self, script, override_cb)
 	def append_coinbase_safe(self, append):
 		return _blkmaker.append_coinbase_safe(self, append)
 	def get_data(self, usetime = None):
