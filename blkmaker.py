@@ -122,12 +122,17 @@ def _append_cb(tmpl, append, appended_at_offset = None):
 	
 	return coinbase
 
-def append_coinbase_safe(tmpl, append):
+def append_coinbase_safe2(tmpl, append, extranoncesz = 0, merkle_only = False):
 	if 'coinbase/append' not in tmpl.mutations and 'coinbase' not in tmpl.mutations:
 		raise RuntimeError('Coinbase appending not allowed by template')
 	
 	datasz = len(tmpl.cbtxn.data)
-	availsz = 100 - sizeof_workid - ord(tmpl.cbtxn.data[_cbScriptSigLen:_cbScriptSigLen+1])
+	if not merkle_only:
+		if extranoncesz < sizeof_workid:
+			extranoncesz = sizeof_workid
+		elif extranoncesz == sizeof_workid:
+			extranoncesz += 1
+	availsz = 100 - extranoncesz - ord(tmpl.cbtxn.data[_cbScriptSigLen:_cbScriptSigLen+1])
 	if len(append) > availsz:
 		return availsz
 	
@@ -136,6 +141,7 @@ def append_coinbase_safe(tmpl, append):
 		raise RuntimeError('Append failed')
 	
 	return availsz
+append_coinbase_safe = append_coinbase_safe2
 
 def _extranonce(tmpl, workid):
 	coinbase = tmpl.cbtxn.data

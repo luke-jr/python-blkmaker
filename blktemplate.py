@@ -72,8 +72,10 @@ class Template:
 		return _blkmaker.init_generation2(self, script, override_cb)
 	def init_generation(self, script, override_cb=False):
 		return _blkmaker.init_generation(self, script, override_cb)
-	def append_coinbase_safe(self, append):
-		return _blkmaker.append_coinbase_safe(self, append)
+	def append_coinbase_safe2(self, append, extranoncesz = 0, merkle_only = False):
+		return _blkmaker.append_coinbase_safe2(self, append, extranoncesz, merkle_only)
+	def append_coinbase_safe(self, append, extranoncesz = 0, merkle_only = False):
+		return _blkmaker.append_coinbase_safe(self, append, extranoncesz, merkle_only)
 	def get_data(self, usetime = None):
 		return _blkmaker.get_data(self, usetime)
 	def get_mdata(self, usetime = None, out_expire = None, extranoncesz = _blkmaker.sizeof_workid):
