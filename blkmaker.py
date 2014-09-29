@@ -189,7 +189,7 @@ def get_data(tmpl, usetime = None, out_expire = None):
 	
 	return (cbuf, dataid)
 
-def get_mdata(tmpl, usetime = None, out_expire = None, extranoncesz = sizeof_workid):
+def get_mdata(tmpl, usetime = None, out_expire = None, extranoncesz = sizeof_workid, can_roll_ntime = True):
 	if usetime is None: usetime = _time()
 	if not (True
 		and time_left(tmpl, usetime)
@@ -212,7 +212,7 @@ def get_mdata(tmpl, usetime = None, out_expire = None, extranoncesz = sizeof_wor
 		return None
 	cbuf += b'\0' * 0x20
 	
-	cbuf += _set_times(tmpl, usetime, out_expire, True)
+	cbuf += _set_times(tmpl, usetime, out_expire, can_roll_ntime)
 	cbuf += tmpl.diffbits
 	
 	return (cbuf, cbtxn, cbextranonceoffset[0], tmpl._mrklbranch)
