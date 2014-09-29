@@ -41,6 +41,7 @@ class _LPInfo:
 
 class Template:
 	def __init__(self):
+		self.auxs = {}
 		self.sigoplimit = 0xffff
 		self.sizelimit = 0xffffffff
 		self.maxtime = 0xffffffff
@@ -127,7 +128,9 @@ class Template:
 		if 'coinbasetxn' in json:
 			self.cbtxn = _Transaction(json['coinbasetxn'])
 		
-		# TODO: coinbaseaux
+		if 'coinbaseaux' in json:
+			for aux in json['coinbaseaux']:
+				self.auxs[aux] = _a2b_hex(json['coinbaseaux'][aux])
 		
 		self.mutations = set(json.get('mutable', ()))
 		

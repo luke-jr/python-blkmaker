@@ -33,6 +33,13 @@ def init_generation3(tmpl, script, override_cb=False):
 	sh += _pack('<B', h)
 	sh = _pack('<B', len(sh)) + sh
 	
+	if getattr(tmpl, 'auxs', None):
+		auxcat = b''
+		for aux in tmpl.auxs.values():
+			auxcat += aux
+		if len(auxcat):
+			sh += _pack('<B', len(auxcat)) + auxcat
+	
 	data = b''
 	data += b"\x01\0\0\0"  # txn ver
 	data += b"\x01"        # input count
