@@ -176,12 +176,16 @@ def submit(tmpl, data, dataid, nonce):
 			for i in range(len(tmpl.txns)):
 				data += tmpl.txns[i].data
 	
+	info = {}
+	if not getattr(tmpl, 'workid', None) is None:
+		info['workid'] = tmpl.workid
+	
 	return {
 		'id': 0,
 		'method': 'submitblock',
 		'params': [
 			_b2a_hex(data).decode('ascii'),
-			{}
+			info
 		]
 	}
 
