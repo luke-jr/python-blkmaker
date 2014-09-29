@@ -61,14 +61,44 @@ init_generation2 = init_generation3
 def init_generation(tmpl, script, override_cb=False):
 	return init_generation2(tmpl, script, override_cb)[0]
 
-def _build_merkle_root(tmpl, coinbase):
-	txnlist = [coinbase] + [t.data for t in tmpl.txns]
-	merklehashes = [_dblsha256(t) for t in txnlist]
-	while len(merklehashes) > 1:
+def _hash_transactions(tmpl):
+	for txn in tmpl.txns:
+		if hasattr(txn, 'hash_'):
+			continue
+		txn.hash_ = _dblsha256(txn.data)
+	return True
+
+def _build_merkle_branches(tmpl):
+	if hasattr(tmpl, '_mrklbranch'):
+		return True
+	
+	if not _hash_transactions(tmpl):
+		return False
+	
+	branchcount = len(tmpl.txns).bit_length();
+	branches = [];
+	
+	merklehashes = [None] + [txn.hash_ for txn in tmpl.txns]
+	while len(branches) < branchcount:
+		branches.append(merklehashes[1])
 		if len(merklehashes) % 2:
 			merklehashes.append(merklehashes[-1])
-		merklehashes = [_dblsha256(merklehashes[i] + merklehashes[i + 1]) for i in range(0, len(merklehashes), 2)]
-	return merklehashes[0]
+		merklehashes = [None] + [_dblsha256(merklehashes[i] + merklehashes[i + 1]) for i in range(2, len(merklehashes), 2)]
+	
+	tmpl._mrklbranch = branches
+	
+	return True
+
+def _build_merkle_root(tmpl, coinbase):
+	if not _build_merkle_branches(tmpl):
+		return None
+	
+	lhs = _dblsha256(coinbase)
+	
+	for rhs in tmpl._mrklbranch:
+		lhs = _dblsha256(lhs + rhs)
+	
+	return lhs
 
 _cbScriptSigLen = 4 + 1 + 36
 sizeof_workid = 8
