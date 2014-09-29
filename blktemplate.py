@@ -34,6 +34,8 @@ class _LPInfo:
 
 class Template:
 	def __init__(self):
+		self.sigoplimit = 0xffff
+		self.sizelimit = 0xffffffff
 		self.maxtime = 0xffffffff
 		self.maxtimeoff = 0x7fff
 		self.mintimeoff = -0x7fff
@@ -86,8 +88,8 @@ class Template:
 		self.curtime = json['curtime']
 		self.height = json['height']
 		self.prevblk = _a2b_hex(json['previousblockhash'])[::-1]
-		self.sigoplimit = json['sigoplimit']
-		self.sizelimit = json['sizelimit']
+		self.sigoplimit = json.get('sigoplimit', self.sigoplimit)
+		self.sizelimit = json.get('sizelimit', self.sizelimit)
 		self.version = json['version']
 		
 		self.cbvalue = json.get('coinbasevalue', None)
