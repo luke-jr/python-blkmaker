@@ -3,15 +3,45 @@
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the standard MIT license.  See COPYING for more details.
 
+import base58 as _base58
 from binascii import b2a_hex as _b2a_hex
 from hashlib import sha256 as _sha256
 from struct import pack as _pack
 from time import time as _time
 
+from blktemplate import _Transaction
+
 MAX_BLOCK_VERSION = 2
 
 def _dblsha256(data):
 	return _sha256(_sha256(data).digest()).digest()
+
+def init_generation(tmpl, script):
+	if not tmpl.cbtxn is None:
+		raise 0
+	
+	# Skip "no extranonce" scriptSig, since it would be too short (min 2 bytes)
+	tmpl.next_dataid += 1
+	
+	data = b''
+	data += b"\x01\0\0\0"  # txn ver
+	data += b"\x01"        # input count
+	data +=   b"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"  # prevout
+	data +=   b"\xff\xff\xff\xff"   # index (-1)
+	data +=   b"\0"                 # scriptSig length (0; extranonce will bring up to 4)
+	data +=   b"\xff\xff\xff\xff"   # sequence
+	data += b"\x01"        # output count
+	data +=   _pack('<Q', tmpl.cbvalue)
+	data +=   _pack('<B', len(script))
+	data +=   script
+	data += b'\0\0\0\0'  # lock time
+	
+	txn = _Transaction(None)
+	
+	txn.data = data
+	
+	tmpl.cbtxn = txn
+	return tmpl.cbvalue
 
 def _build_merkle_root(tmpl, coinbase):
 	txnlist = [coinbase] + [t.data for t in tmpl.txns]
@@ -137,3 +167,26 @@ def submit(tmpl, data, dataid, nonce):
 			{}
 		]
 	}
+
+def address_to_script(addr):
+	addrbin = _base58.b58decode(addr, 25)
+	if addrbin is None:
+		raise RuntimeError('Invalid address')
+	addrver = _base58.get_bcaddress_version(addr)
+	if addrver == 0 or addrver == 111:
+		# Bitcoin pubkey hash or Testnet pubkey hash
+		return b''
+		+ b'\x76'  # OP_DUP
+		+ b'\xa9'  # OP_HASH160
+		+ b'\x14'  # push 20 bytes
+		+ addrbin
+		+ b'\x88'  # OP_EQUALVERIFY
+		+ b'\xac'  # OP_CHECKSIG
+	if addrver == 5 or addrver == 196:
+		# Bitcoin script hash or Testnet script hash
+		return b''
+		+ b'\xa9'  # OP_HASH160
+		+ b'\x14'  # push 20 bytes
+		+ addrbin
+		+ b'\x87'  # OP_EQUAL
+	raise RuntimeError('Invalid address version')

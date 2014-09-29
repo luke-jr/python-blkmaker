@@ -29,7 +29,9 @@ def request(jcaps, lpid = None):
 	return req
 
 class _Transaction:
-	def __init__(self, txnj):
+	def __init__(self, txnj = {}):
+		if txnj is None:
+			return
 		if 'data' not in txnj:
 			raise ValueError("Missing or invalid type for transaction data")
 		self.data = _a2b_hex(txnj['data'])
@@ -64,6 +66,8 @@ class Template:
 		return self.submitold
 	
 	# Wrappers around blkmaker, for OO friendliness
+	def init_generation(self, script):
+		return _blkmaker.init_generation(self, script)
 	def append_coinbase_safe(self, append):
 		return _blkmaker.append_coinbase_safe(self, append)
 	def get_data(self, usetime = None):
