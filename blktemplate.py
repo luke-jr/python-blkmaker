@@ -134,6 +134,9 @@ class Template:
 			for aux in json['coinbaseaux']:
 				self.auxs[aux] = _a2b_hex(json['coinbaseaux'][aux])
 		
+		if 'target' in json:
+			self.target = _a2b_hex(json['target'])
+		
 		self.mutations = set(json.get('mutable', ()))
 		
 		if (self.version > 2 or (self.version == 2 and not self.height)):
