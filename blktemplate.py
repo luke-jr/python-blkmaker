@@ -119,7 +119,7 @@ class Template:
 		
 		# TODO: coinbaseaux
 		
-		self.mutations = json.get('mutable', ())
+		self.mutations = set(json.get('mutable', ()))
 		
 		if (self.version > 2 or (self.version == 2 and not self.height)):
 			if 'version/reduce' in self.mutations:

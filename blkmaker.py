@@ -47,6 +47,11 @@ def init_generation(tmpl, script):
 	txn.data = data
 	
 	tmpl.cbtxn = txn
+	
+	tmpl.mutations.add('coinbase/append')
+	tmpl.mutations.add('coinbase')
+	tmpl.mutations.add('generate')
+	
 	return tmpl.cbvalue
 
 def _build_merkle_root(tmpl, coinbase):
