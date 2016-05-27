@@ -39,6 +39,8 @@ def init_generation3(tmpl, script, override_cb=False):
 			auxcat += aux
 		if len(auxcat):
 			sh += _pack('<B', len(auxcat)) + auxcat
+		if len(sh) > 100:
+			return (0, True)
 	
 	data = b''
 	data += b"\x01\0\0\0"  # txn ver
