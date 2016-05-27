@@ -130,7 +130,12 @@ class Template:
 			self.lp.uri = json.get('longpolluri', None)
 		self.submitold = json.get('submitold', True)
 		
-		self.txns = [_Transaction(t) for t in json['transactions']]
+		self.txns = []
+		self.txns_datasz = 0
+		for t in json['transactions']:
+			tobj = _Transaction(t)
+			self.txns.append(tobj)
+			self.txns_datasz += len(tobj.data)
 		
 		if 'coinbasetxn' in json:
 			self.cbtxn = _Transaction(json['coinbasetxn'])
