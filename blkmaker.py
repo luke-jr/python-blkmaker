@@ -193,7 +193,7 @@ def _sample_data(tmpl, dataid):
 
 def get_data(tmpl, usetime = None, out_expire = None):
 	if usetime is None: usetime = _time()
-	if (not (time_left(tmpl, usetime) and work_left(tmpl))):
+	if ((not (time_left(tmpl, usetime) and work_left(tmpl))) and not tmpl.cbtxn is None):
 		return (None, None)
 	
 	dataid = tmpl.next_dataid
