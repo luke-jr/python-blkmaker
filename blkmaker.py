@@ -13,7 +13,7 @@ from time import time as _time
 
 from blktemplate import _Transaction, request as _request
 
-MAX_BLOCK_VERSION = 2
+MAX_BLOCK_VERSION = 3
 
 def _dblsha256(data):
 	return _sha256(_sha256(data).digest()).digest()

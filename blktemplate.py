@@ -144,9 +144,9 @@ class Template:
 		
 		self.mutations = set(json.get('mutable', ()))
 		
-		if (self.version > 2 or (self.version == 2 and not self.height)):
+		if (self.version > _blkmaker.MAX_BLOCK_VERSION or (self.version >= 2 and not self.height)):
 			if 'version/reduce' in self.mutations:
-				self.version = 2 if self.height else 1
+				self.version = _blkmaker.MAX_BLOCK_VERSION if self.height else 1
 			elif 'version/force' not in self.mutations:
 				raise ValueError("Unrecognized block version, and not allowed to reduce or force it")
 		
