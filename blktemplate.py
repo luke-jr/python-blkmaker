@@ -100,7 +100,7 @@ class Template:
 	def add(self, json, time_rcvd = None):
 		if time_rcvd is None: time_rcvd = _time()
 		if self.version:
-			return False;
+			raise ValueError("Template already populated (combining not supported)")
 		
 		if 'result' in json:
 			if json.get('error', None):
