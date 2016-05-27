@@ -58,6 +58,9 @@ def init_generation3(tmpl, script, override_cb=False):
 	data +=   script
 	data += b'\0\0\0\0'  # lock time
 	
+	if tmpl.txns_datasz + len(data) > tmpl.sizelimit:
+		return (0, True)
+	
 	txn = _Transaction(None)
 	
 	txn.data = data
@@ -124,6 +127,9 @@ def _append_cb(tmpl, append, appended_at_offset = None):
 	if origLen > coinbase_size_limit - appendsz:
 		return None
 	
+	if len(tmpl.cbtxn.data) + tmpl.txns_datasz + appendsz > tmpl.sizelimit:
+		return None
+	
 	cbExtraNonce = _cbScriptSigLen + 1 + origLen
 	if not appended_at_offset is None:
 		appended_at_offset[0] = cbExtraNonce
@@ -144,6 +150,14 @@ def append_coinbase_safe2(tmpl, append, extranoncesz = 0, merkle_only = False):
 		elif extranoncesz == sizeof_workid:
 			extranoncesz += 1
 	availsz = coinbase_size_limit - extranoncesz - ord(tmpl.cbtxn.data[_cbScriptSigLen:_cbScriptSigLen+1])
+	
+	current_blocksize = len(tmpl.cbtxn.data) + tmpl.txns_datasz
+	if current_blocksize > tmpl.sizelimit:
+		return 0
+	availsz2 = tmpl.sizelimit - current_blocksize
+	if availsz2 < availsz:
+		availsz = availsz2
+	
 	if len(append) > availsz:
 		return availsz
 	
