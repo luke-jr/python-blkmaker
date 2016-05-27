@@ -15,6 +15,8 @@ from blktemplate import _Transaction, request as _request
 
 MAX_BLOCK_VERSION = 4
 
+coinbase_size_limit = 100
+
 def _dblsha256(data):
 	return _sha256(_sha256(data).digest()).digest()
 
@@ -39,7 +41,7 @@ def init_generation3(tmpl, script, override_cb=False):
 			auxcat += aux
 		if len(auxcat):
 			sh += _pack('<B', len(auxcat)) + auxcat
-		if len(sh) > 100:
+		if len(sh) > coinbase_size_limit:
 			return (0, True)
 	
 	data = b''
@@ -119,7 +121,7 @@ def _append_cb(tmpl, append, appended_at_offset = None):
 	origLen = ord(coinbase[_cbScriptSigLen:_cbScriptSigLen+1])
 	appendsz = len(append)
 	
-	if origLen > 100 - appendsz:
+	if origLen > coinbase_size_limit - appendsz:
 		return None
 	
 	cbExtraNonce = _cbScriptSigLen + 1 + origLen
@@ -141,7 +143,7 @@ def append_coinbase_safe2(tmpl, append, extranoncesz = 0, merkle_only = False):
 			extranoncesz = sizeof_workid
 		elif extranoncesz == sizeof_workid:
 			extranoncesz += 1
-	availsz = 100 - extranoncesz - ord(tmpl.cbtxn.data[_cbScriptSigLen:_cbScriptSigLen+1])
+	availsz = coinbase_size_limit - extranoncesz - ord(tmpl.cbtxn.data[_cbScriptSigLen:_cbScriptSigLen+1])
 	if len(append) > availsz:
 		return availsz
 	
