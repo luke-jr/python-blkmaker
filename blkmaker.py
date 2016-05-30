@@ -293,15 +293,18 @@ def _assemble_submission2_internal(tmpl, data, extranonce, nonce, foreign):
 	
 	return _b2a_hex(data).decode('ascii')
 
-def _assemble_submission2(tmpl, data, extranonce, nonce, foreign):
-	if extranonce and len(extranonce) == sizeof_workid:
+def _assemble_submission2(tmpl, data, extranonce, dataid, nonce, foreign):
+	if dataid:
+		if extranonce:
+			raise RuntimeError('Cannot specify both extranonce and dataid')
+		extranonce = _pack('<Q', workid)
+	elif extranonce and len(extranonce) == sizeof_workid:
 		# Avoid overlapping with blkmk_get_data use
 		extranonce += b'\0'
 	return _assemble_submission2_internal(tmpl, data, extranonce, nonce, foreign)
 
 def _assemble_submission(tmpl, data, dataid, nonce, foreign):
-	extranonce = _pack('<Q', workid) if dataid else b''
-	return _assemble_submission2_internal(tmpl, data, extranonce, nonce, foreign)
+	return _assemble_submission2(tmpl, data, None, dataid, nonce, foreign)
 
 def propose(tmpl, caps, foreign):
 	jreq = _request(caps)
