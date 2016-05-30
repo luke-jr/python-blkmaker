@@ -144,11 +144,11 @@ def append_coinbase_safe2(tmpl, append, extranoncesz = 0, merkle_only = False):
 		raise RuntimeError('Coinbase appending not allowed by template')
 	
 	datasz = len(tmpl.cbtxn.data)
-	if not merkle_only:
+	if extranoncesz == sizeof_workid:
+		extranoncesz += 1
+	elif not merkle_only:
 		if extranoncesz < sizeof_workid:
 			extranoncesz = sizeof_workid
-		elif extranoncesz == sizeof_workid:
-			extranoncesz += 1
 	availsz = coinbase_size_limit - extranoncesz - ord(tmpl.cbtxn.data[_cbScriptSigLen:_cbScriptSigLen+1])
 	
 	current_blocksize = len(tmpl.cbtxn.data) + tmpl.txns_datasz
