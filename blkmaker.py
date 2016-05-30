@@ -274,20 +274,34 @@ def _varintEncode(n):
 	# blocks
 	return b'\xfd' + _pack('<H', n)
 
-def _assemble_submission(tmpl, data, dataid, nonce, foreign):
+def _assemble_submission2_internal(tmpl, data, extranonce, nonce, foreign):
 	data = data[:76]
 	data += _pack('!I', nonce)
 	
-	if foreign or ('submit/truncate' not in tmpl.mutations or dataid):
+	if foreign or ('submit/truncate' not in tmpl.mutations or extranonce):
 		data += _varintEncode(1 + len(tmpl.txns))
 		
-		data += _extranonce(tmpl, dataid)
+		# Essentially _extranonce
+		if extranonce:
+			data += _append_cb(tmpl, extranonce)
+		else:
+			data += tmpl.cbtxn.data
 		
 		if foreign or ('submit/coinbase' not in tmpl.mutations):
 			for i in range(len(tmpl.txns)):
 				data += tmpl.txns[i].data
 	
 	return _b2a_hex(data).decode('ascii')
+
+def _assemble_submission2(tmpl, data, extranonce, nonce, foreign):
+	if extranonce and len(extranonce) == sizeof_workid:
+		# Avoid overlapping with blkmk_get_data use
+		extranonce += b'\0'
+	return _assemble_submission2_internal(tmpl, data, extranonce, nonce, foreign)
+
+def _assemble_submission(tmpl, data, dataid, nonce, foreign):
+	extranonce = _pack('<Q', workid) if dataid else b''
+	return _assemble_submission2_internal(tmpl, data, extranonce, nonce, foreign)
 
 def propose(tmpl, caps, foreign):
 	jreq = _request(caps)
