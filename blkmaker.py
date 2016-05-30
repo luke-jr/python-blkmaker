@@ -320,8 +320,8 @@ def propose(tmpl, caps, foreign):
 	
 	return jreq
 
-def submit(tmpl, data, dataid, nonce, foreign=False):
-	blkhex = _assemble_submission2(tmpl, data, None, dataid, nonce, foreign)
+def _submit(tmpl, data, extranonce, dataid, nonce, foreign):
+	blkhex = _assemble_submission2(tmpl, data, extranonce, dataid, nonce, foreign)
 	
 	info = {}
 	if (not getattr(tmpl, 'workid', None) is None) and not foreign:
@@ -336,8 +336,11 @@ def submit(tmpl, data, dataid, nonce, foreign=False):
 		]
 	}
 
+def submit(tmpl, data, dataid, nonce, foreign=False):
+	return _submit(tmpl, data, None, dataid, nonce, foreign)
+
 def submit_foreign(tmpl, data, dataid, nonce):
-	return submit(tmpl, data, dataid, nonce, True)
+	return _submit(tmpl, data, None, dataid, nonce, True)
 
 def address_to_script(addr):
 	addrbin = _base58.b58decode(addr, 25)
