@@ -342,6 +342,9 @@ def submit(tmpl, data, dataid, nonce, foreign=False):
 def submit_foreign(tmpl, data, dataid, nonce):
 	return _submit(tmpl, data, None, dataid, nonce, True)
 
+def submitm(tmpl, data, extranonce, nonce, foreign=False):
+	return _submit(tmpl, data, extranonce, None, nonce, foreign)
+
 def address_to_script(addr):
 	addrbin = _base58.b58decode(addr, 25)
 	if addrbin is None:
