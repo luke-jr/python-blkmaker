@@ -303,9 +303,6 @@ def _assemble_submission2(tmpl, data, extranonce, dataid, nonce, foreign):
 		extranonce += b'\0'
 	return _assemble_submission2_internal(tmpl, data, extranonce, nonce, foreign)
 
-def _assemble_submission(tmpl, data, dataid, nonce, foreign):
-	return _assemble_submission2(tmpl, data, None, dataid, nonce, foreign)
-
 def propose(tmpl, caps, foreign):
 	jreq = _request(caps)
 	jparams = jreq['params'][0]
@@ -318,13 +315,13 @@ def propose(tmpl, caps, foreign):
 		dataid = 1
 	
 	sdata = _sample_data(tmpl, dataid)
-	blkhex = _assemble_submission(tmpl, sdata, dataid, 0, foreign)
+	blkhex = _assemble_submission2(tmpl, sdata, None, dataid, 0, foreign)
 	jparams['data'] = blkhex
 	
 	return jreq
 
 def submit(tmpl, data, dataid, nonce, foreign=False):
-	blkhex = _assemble_submission(tmpl, data, dataid, nonce, foreign)
+	blkhex = _assemble_submission2(tmpl, data, None, dataid, nonce, foreign)
 	
 	info = {}
 	if (not getattr(tmpl, 'workid', None) is None) and not foreign:
