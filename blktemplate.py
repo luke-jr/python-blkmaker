@@ -4,7 +4,7 @@
 # under the terms of the standard MIT license.  See COPYING for more details.
 
 from binascii import a2b_hex as __a2b_hex
-import blkmaker as _blkmaker
+from . import blkmaker as _blkmaker
 from time import time as _time
 
 try:
@@ -88,10 +88,10 @@ class Template:
 		return _blkmaker.work_left(self)
 	def propose(self, caps, foreign):
 		return _blkmaker.propose(self, caps, foreign)
-	def submit(self, data, dataid, nonce, foreign=False):
-		return _blkmaker.submit(self, data, dataid, nonce, foreign)
-	def submit_foreign(self, data, dataid, nonce):
-		return _blkmaker.submit_foreign(self, data, dataid, nonce)
+	def submit(self, data, dataid, nonce, multiplier, foreign=False):
+		return _blkmaker.submit(self, data, dataid, nonce, multiplier, foreign)
+	def submit_foreign(self, data, dataid, nonce, multiplier):
+		return _blkmaker.submit_foreign(self, data, dataid, nonce, multiplier)
 	
 	# JSON-specific stuff
 	def request(self, lpid = None):
