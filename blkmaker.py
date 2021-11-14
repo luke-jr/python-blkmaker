@@ -14,7 +14,7 @@ from math import ceil
 
 from .blktemplate import _Transaction, request as _request
 
-MAX_BLOCK_VERSION = 1 << 30
+MAX_BLOCK_VERSION = 1 << 30 - 1
 
 coinbase_size_limit = 100
 
