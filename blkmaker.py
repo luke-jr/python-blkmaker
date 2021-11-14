@@ -14,7 +14,9 @@ from math import ceil
 
 from .blktemplate import _Transaction, request as _request
 
-MAX_BLOCK_VERSION = 1 << 29
+# Refer to versionbits.h, validation.cpp, ComputeBlockVersion()
+VERSIONBITS_TOP_BITS = 0x20000000
+MAX_BLOCK_VERSION = VERSIONBITS_TOP_BITS * 2 - 1
 
 coinbase_size_limit = 100
 
