@@ -292,7 +292,13 @@ def _serialize_bitcoin_compact_size(size):
 	return data
 
 def _serialize_primecoin_multiplier(multiplier):
-	size = ceil(len(hex(multiplier).lstrip('0x')) / 2)
+	hexstr = hex(multiplier).lstrip('0x')
+	if len(hexstr) % 2:
+		size = (1 + len(hexstr)) // 2
+	else:
+		size = len(hexstr) // 2
+		if hexstr[0] >= '8':
+			size += 1
 	data = _serialize_bitcoin_compact_size(size)
 	data += _pack(f'<{size}s', multiplier.to_bytes(size, byteorder='little'))
 	return data
